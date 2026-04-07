@@ -161,20 +161,17 @@ struct Cycle { // 轮换
     // 将轮换作用在数组上：把 elements[i] 的值挪到 elements[(i+1)%k]
     void apply(int* permutation, size_t n) const {
         if (size == 0) return;
-        int first = elements[0];
-        if (static_cast<size_t>(first) >= n) return;
-        int prev_val = permutation[first];
-        for (size_t i = 1; i < size; ++i) {
-            int idx = elements[i];
-            if (static_cast<size_t>(idx) >= n) return;
+        // 复制涉及的值，避免覆盖
+        for (size_t i = 0; i < size; ++i) {
+            if (static_cast<size_t>(elements[i]) >= n) return;
         }
-        for (size_t i = 1; i < size; ++i) {
-            int idx = elements[i];
-            int tmp = permutation[idx];
-            permutation[idx] = prev_val;
-            prev_val = tmp;
+        int* buf = new int[size];
+        for (size_t i = 0; i < size; ++i) buf[i] = permutation[elements[i]];
+        for (size_t i = 0; i < size; ++i) {
+            size_t ni = (i + 1) % size;
+            permutation[elements[ni]] = buf[i];
         }
-        permutation[first] = prev_val;
+        delete[] buf;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Cycle& c) {
